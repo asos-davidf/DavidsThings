@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DavidsThings.iml" filepath="$PROJECT_DIR$/DavidsThings.iml" />
       <module fileurl="file://$PROJECT_DIR$/rotatingDisplay/app.iml" filepath="$PROJECT_DIR$/rotatingDisplay/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rotatingDisplayCompanion/rotatingDisplayCompanion.iml" filepath="$PROJECT_DIR$/rotatingDisplayCompanion/rotatingDisplayCompanion.iml" />
     </modules>
   </component>
 </project>

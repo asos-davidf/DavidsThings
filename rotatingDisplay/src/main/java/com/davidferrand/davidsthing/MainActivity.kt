@@ -6,6 +6,11 @@ import com.google.android.things.contrib.driver.button.Button
 import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay
 import com.google.android.things.contrib.driver.ht16k33.Ht16k33
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
 
 class MainActivity : Activity() {
     private lateinit var display: AlphanumericDisplay
@@ -21,11 +26,27 @@ class MainActivity : Activity() {
 
         displayAnimator = DisplayAnimator(display)
 
-        displayMessage("Press a button")
+//        displayMessage("Press a button")
+//
+//        playMessageOnButtonPress(buttonA, "Hello")
+//        playMessageOnButtonPress(buttonB, "Hola")
+//        playMessageOnButtonPress(buttonC, "Bonjour")
 
-        playMessageOnButtonPress(buttonA, "Hello")
-        playMessageOnButtonPress(buttonB, "Hola")
-        playMessageOnButtonPress(buttonC, "Bonjour")
+        val database = FirebaseDatabase.getInstance()
+        val messageRef = database.getReference("message")
+
+        messageRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                val value = dataSnapshot.getValue(String::class.java)
+                displayMessage(value ?: "No message")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Failed to read value
+            }
+        })
     }
 
     private fun playMessageOnButtonPress(button: Button, message: String) {

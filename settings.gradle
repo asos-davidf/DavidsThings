@@ -1,1 +1,1 @@
-include ':rotatingDisplay'
+include ':rotatingDisplay', ':rotatingDisplayCompanion'
