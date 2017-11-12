@@ -2,6 +2,7 @@ package com.davidferrand.davidsthing
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import com.google.android.things.contrib.driver.button.Button
 import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay
 import com.google.android.things.contrib.driver.ht16k33.Ht16k33
@@ -10,6 +11,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.text.Normalizer
 
 
 class MainActivity : Activity() {
@@ -53,8 +55,20 @@ class MainActivity : Activity() {
         button.setOnButtonEventListener { _, pressed -> if (pressed) displayMessage(message) }
     }
 
+    private val TAG = MainActivity::class.java.simpleName
+
     private fun displayMessage(message: String) {
-        displayAnimator.display(message.toUpperCase())
+        val normalisedMsg = Normalizer.normalize(message, Normalizer.Form.NFD)
+                .replace(Regex.fromLiteral("[^\\p{ASCII}]"), "")
+                .toUpperCase()
+
+        Log.v(TAG, "Message received: '$message'. Normalised: '$normalisedMsg'")
+
+        try {
+            displayAnimator.display(normalisedMsg)
+        } catch (e: Exception) {
+            displayMessage("Invalid message")
+        }
     }
 
     override fun onDestroy() {
