@@ -12,9 +12,13 @@ class DisplayAnimator(private val display: AlphanumericDisplay) {
 
     private var currentTimer: Timer? = null
 
-    fun display(string: String) {
-        currentTimer?.cancel()
-        display.clear()
+//    private val thread: HandlerThread by lazy { HandlerThread("DisplayThread").apply { start() } }
+//    private val handler: Handler by lazy { Handler(thread.looper) }
+
+    fun display(string: String, times: Int = 1) {
+        clear()
+
+        displaying = true
 
         if (string.length <= 4) {
             // That's it, no need to animate
@@ -23,10 +27,9 @@ class DisplayAnimator(private val display: AlphanumericDisplay) {
         }
 
         display.display(string.substring(0, 4))
-
-        rotatingString = string + FINAL_SPACE
+        rotatingString = (string + FINAL_SPACE).repeat(times)
         currentTimer = Timer().apply {
-            scheduleAtFixedRate(object : TimerTask() {
+            schedule(object : TimerTask() {
                 override fun run() {
                     displayNextPart()
                 }
@@ -35,7 +38,21 @@ class DisplayAnimator(private val display: AlphanumericDisplay) {
     }
 
     private fun displayNextPart() {
-        rotatingString = (rotatingString + rotatingString.first()).drop(1)
-        display.display(rotatingString.substring(0, 4))
+        rotatingString = (rotatingString /*+ rotatingString.first()*/).drop(1)
+        if (rotatingString.isEmpty()) {
+            clear()
+            return
+        }
+        display.display(rotatingString/*.substring(0, 4)*/)
+    }
+
+    var displaying: Boolean = false
+        private set
+
+    fun clear() {
+        currentTimer?.cancel()
+        display.clear()
+
+        displaying = false
     }
 }

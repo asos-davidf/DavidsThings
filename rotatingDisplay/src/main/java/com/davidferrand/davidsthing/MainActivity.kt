@@ -37,6 +37,7 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
     private val TAG = MainActivity::class.java.simpleName
 
     private val database: FirebaseDatabase by lazy { FirebaseDatabase.getInstance() }
+    private var currentMessage: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +46,10 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
 
         displayAnimator = DisplayAnimator(display)
 
-//        displayMessage("Press a button")
+        buttonA.setOnButtonEventListener { _, pressed -> if (pressed) showCurrentMessage(3) }
+        buttonB.setOnButtonEventListener { _, pressed -> if (pressed) displayAnimator.clear() }
+
+//        saveMessage("Press a button")
 //
 //        playMessageOnButtonPress(buttonA, "Hello")
 //        playMessageOnButtonPress(buttonB, "Hola")
@@ -58,7 +62,7 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 val value = dataSnapshot.getValue(String::class.java)
-                displayMessage(value ?: "No message")
+                saveMessage(value ?: "No message")
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -67,11 +71,21 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
         })
     }
 
-    private fun playMessageOnButtonPress(button: Button, message: String) {
-        button.setOnButtonEventListener { _, pressed -> if (pressed) displayMessage(message) }
+    private fun showCurrentMessage(times: Int) {
+        currentMessage?.let {
+            try {
+                displayAnimator.display(it, times)
+            } catch (e: Exception) {
+                displayAnimator.display("Invalid message")
+            }
+        }
     }
 
-    private fun displayMessage(message: String) {
+    private fun playMessageOnButtonPress(button: Button, message: String) {
+        button.setOnButtonEventListener { _, pressed -> if (pressed) saveMessage(message) }
+    }
+
+    private fun saveMessage(message: String) {
         val normalisedMsg = Normalizer.normalize(message, Normalizer.Form.NFD)
                 .replace(Regex.fromLiteral("[^\\p{ASCII}]"), "")
                 .toUpperCase()
@@ -81,11 +95,8 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
         if (normalisedMsg.equals("camera", ignoreCase = true)) {
             takePictureAndUpload()
         } else {
-            try {
-                displayAnimator.display(normalisedMsg)
-            } catch (e: Exception) {
-                displayMessage("Invalid message")
-            }
+            currentMessage = normalisedMsg
+            showCurrentMessage(3)
         }
     }
 
@@ -154,6 +165,19 @@ class MainActivity : Activity(), ImageReader.OnImageAvailableListener {
         buttonA = RainbowHat.openButtonA()
         buttonB = RainbowHat.openButtonB()
         buttonC = RainbowHat.openButtonC()
+
+        RainbowHat.openLedBlue().apply {
+            value = false
+            close()
+        }
+        RainbowHat.openLedRed().apply {
+            value = false
+            close()
+        }
+        RainbowHat.openLedGreen().apply {
+            value = false
+            close()
+        }
     }
 
     private fun destroyPeriphs() {
